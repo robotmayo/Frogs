@@ -1,5 +1,5 @@
 {
-  "name": "Frogs",
+  "name": "frogs",
   "version": "0.5.0",
   "description": "Super simple file logger.",
   "main": "index.js",
