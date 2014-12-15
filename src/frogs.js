@@ -13,8 +13,8 @@ Frogs.add = function Frogs$add(opts){
     if(!file.name) throw new Error("Name required!");
     if(!file.fileName) throw new Error("File name is required!");
     if(!file.dirName) file.dirName = __dirname;
-    file.fullPath = Path.join(file.dirName, file.name);
-    file.stream = fs.createWriteStream(file.fileName, {flags : 'a'});
+    file.fullPath = Path.join(file.dirName, file.fileName);
+    file.stream = fs.createWriteStream(file.fullPath, {flags : 'a'});
     this.names[file.name] = file;
     return this;
 }
