@@ -44,7 +44,7 @@ Frogs.log = function Frogs$log(to, msg, meta, bubble){
     return this;
 }
 
-Frogs.also = function(to){
+Frogs.also = function also(to){
     if(!this._lastMessage) return;
     var file = this.names[to];
     if(!file) throw new Error("You must add the file" + to + " first!");
