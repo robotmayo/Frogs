@@ -3,76 +3,88 @@ var fs = require('fs'),
     xtend = require('xtend');
 
 
-var Frogs = module.exports = {};
+var Frogs = module.exports = function(opts){
+    this.logs = {};
+    this.opts = xtend({}, opts || {});
+    if(this.opts.global){
+        this.add(this.opts.global);
+    }
+};
 
-Frogs.names = {};
-
-
-Frogs.add = function Frogs$add(opts){
-    var file = opts || {};
-    if(!file.name) throw new Error("Name required!");
-    if(!file.fileName) throw new Error("File name is required!");
-    if(!file.dirName) file.dirName = __dirname;
-    file.fullPath = Path.join(file.dirName, file.fileName);
-    file.stream = fs.createWriteStream(file.fullPath, {flags : 'a'});
-    this.names[file.name] = file;
-    return this;
-}
-
-Frogs.log = function Frogs$log(to, msg, meta, bubble){
-    var file = this.names[to];
-    var args = Array.prototype.slice.call(arguments);
-    if(args.length === 3){
-        if(meta === true || meta === false){
-            bubble = meta;
-            meta = {};
-        }else{
-            bubble = false;
+Frogs.prototype.add = function(opts){
+    if(!opts.name) throw new Error("Name required for log!");
+    if(!opts.stream){
+        if(!opts.filename) throw new Error("File name is requred");
+        opts.dirname = opts.dirname || process.cwd();
+        opts.fullPath = Path.join(opts.dirname, opts.filename);
+        opts.stream = fs.createWriteStream(opts.fullPath, {flags : 'a'});
+    }
+    this.logs[opts.name] = opts;
+    if(opts.useNameAsLog){
+        if(this[opts.name]) throw new Error('This name ' + opts.name + 'is already in use.');
+        this[opts.name] = function(msg, meta, bubble){
+            return this.log(opts.name, msg, meta, bubble);
         }
     }
-    if(!file) throw new Error("You must add the file" + to + " first!");
-    msg = Buffer.isBuffer(msg) ? msg.toString('utf-8') : msg;
-    var output = {message : msg, timestamp : (new Date()).toISOString()};
-    output = xtend(output, meta || {});
-    output = JSON.stringify(output) + '\n';
-    file.stream.write(output);
-    this._lastMessage = output;
-    var self = this;
-    if(bubble === true && typeof file.next !== 'undefined'){
-        return this._chainLog(file.next, output);
+    return this;
+}
+
+Frogs.prototype.log = function Frogs$log(to, msg, meta, bubble){
+    var output = '';
+    var logObj = this.logs[to];
+    var timestamp = logObj.timestamp || this.opts.timestamp;
+    if(!logObj) {
+        throw new Error("You must add the log before you can write to it!")
     }
-    return this;
+    var format = logObj.format || this.opts.format;
+    if(format) {
+        output = format(msg, meta);
+        if(timestamp) output += timestamp();
+        else output += (new Date()).toISOString();
+    }else{
+        var temp = {message : msg};
+        if(timestamp){
+            temp.timestamp = timestamp();
+        }else{
+            temp.timestamp = (new Date()).toISOString();
+        }
+        output = xtend(temp, meta || {});
+        output = JSON.stringify(output);
+    }
+    logObj.stream.write(output);
+    if( (bubble === true || logObj.bubble === true) && file.next){
+        return this._chainlog(logObj.next, output);
+    }
+    return logObj.stream;
 }
 
-Frogs.also = function also(to){
-    if(!this._lastMessage) return;
-    var file = this.names[to];
-    if(!file) throw new Error("You must add the file" + to + " first!");
-    file.stream.write(this._lastMessage);
-    return this;
+Frogs.prototype.format = function(format, msg, meta){
+    var tokens = {
+
+    }
 }
 
-Frogs._chainLog = function Frogs$_chainLog(name, out){
-    var file = this.names[name];
+Frogs.prototype._chainLog = function(name, out){
+    var file = this.logs[name];
     file.stream.write(out);
     if(typeof file.next !== 'undefined') {
         return this._chainLog(file.next, out);
     }
-    return this;
+    return file.stream;
 }
 
-Frogs.chain = function Frogs$chain(){
+Frogs.prototype.chain = function(){
     var args = Array.prototype.slice.call(arguments);
     if(args.length < 2) throw new Error("Chain must consist of at least two names!");
     var self = this;
     args.reduce(function(pre, cur){
         var fa = pre;
-        var fb = self.names[cur];
+        var fb = self.logs[cur];
         if(!fa) throw new Error("You must add the file" + pre.name + " first!");
         if(!fb) throw new Error("You must add the file" + cur + " first!");
         fa.next = fb.name;
         return fb;
-    }, this.names[args[0]]);
+    }, this.logs[args[0]]);
     return this;
 }
 
