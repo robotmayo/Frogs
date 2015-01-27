@@ -1,4 +1,4 @@
-Frogs v1.0.2
+Frogs v1.0.4
 ======
 
 #### Super Simple File Logger

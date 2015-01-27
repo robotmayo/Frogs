@@ -54,15 +54,9 @@ Frogs.prototype.log = function(to, msg, meta, bubble){
     output += '\n';
     logObj.stream.write(output);
     if( (bubble === true || logObj.bubble === true) && logObj.next){
-        return this._chainlog(logObj.next, output);
+        return this._chainLog(logObj.next, output);
     }
     return logObj.stream;
-}
-
-Frogs.prototype.format = function(format, msg, meta){
-    var tokens = {
-
-    }
 }
 
 Frogs.prototype._chainLog = function(name, out){
