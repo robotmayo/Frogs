@@ -1,6 +1,6 @@
 {
   "name": "frogs",
-  "version": "0.6.1",
+  "version": "1.0.2",
   "description": "Super simple file logger.",
   "main": "index.js",
   "dependencies": {
@@ -15,6 +15,13 @@
     "file",
     "adam"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/robotmayo/Frogs"
+  },
+  "bugs": {
+    "url": "https://github.com/robotmayo/Frogs/issues"
+  },
   "author": "robotmayo",
   "license": "MIT"
 }

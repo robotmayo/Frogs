@@ -51,6 +51,7 @@ Frogs.prototype.log = function Frogs$log(to, msg, meta, bubble){
         output = xtend(temp, meta || {});
         output = JSON.stringify(output);
     }
+    output += '\n';
     logObj.stream.write(output);
     if( (bubble === true || logObj.bubble === true) && file.next){
         return this._chainlog(logObj.next, output);
