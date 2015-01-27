@@ -29,7 +29,7 @@ Frogs.prototype.add = function(opts){
     return this;
 }
 
-Frogs.prototype.log = function Frogs$log(to, msg, meta, bubble){
+Frogs.prototype.log = function(to, msg, meta, bubble){
     var output = '';
     var logObj = this.logs[to];
     var timestamp = logObj.timestamp || this.opts.timestamp;
@@ -53,7 +53,7 @@ Frogs.prototype.log = function Frogs$log(to, msg, meta, bubble){
     }
     output += '\n';
     logObj.stream.write(output);
-    if( (bubble === true || logObj.bubble === true) && file.next){
+    if( (bubble === true || logObj.bubble === true) && logObj.next){
         return this._chainlog(logObj.next, output);
     }
     return logObj.stream;
