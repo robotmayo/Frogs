@@ -1,7 +1,13 @@
 var fs = require('fs'),
     Path = require('path'),
+    EventEmitter = require('events').EventEmitter;
     xtend = require('xtend');
 
+var EVENTS = {
+    ADDED : 'added',
+    REMOVED : 'removed',
+    LOG : 'log'
+}
 
 var Frogs = module.exports = function(opts){
     this.logs = {};
@@ -10,6 +16,7 @@ var Frogs = module.exports = function(opts){
         this.add(this.opts.global);
     }
 };
+Frogs.prototype = Object.create(EventEmitter.prototype);
 
 Frogs.prototype.add = function(opts){
     if(!opts.name) throw new Error("Name required for log!");
@@ -26,6 +33,7 @@ Frogs.prototype.add = function(opts){
             return this.log(opts.name, msg, meta, bubble);
         }
     }
+    this.emit(EVENTS.ADDED, opts);
     return this;
 }
 
